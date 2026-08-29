@@ -1,0 +1,812 @@
+<?php
+// admin_manage.php
+// Central Executive Administration Console in PHP
+require_once 'config.php';
+
+$authError = '';
+$toastMessage = '';
+
+// Handle sign out
+if (isset($_GET['logout'])) {
+    unset($_SESSION['agaro_admin_authed']);
+    header("Location: admin_manage.php");
+    exit();
+}
+
+// Handle login submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+    
+    if ($username === 'admin' && $password === 'agaro2026') {
+        $_SESSION['agaro_admin_authed'] = true;
+        header("Location: admin_manage.php");
+        exit();
+    } else {
+        $authError = "Incorrect Administration credentials. Refusing security clearance.";
+    }
+}
+
+// Fast pass login helper
+if (isset($_GET['bypass'])) {
+    $_SESSION['agaro_admin_authed'] = true;
+    header("Location: admin_manage.php");
+    exit();
+}
+
+// Check authorization
+$isAuthenticated = isset($_SESSION['agaro_admin_authed']) && $_SESSION['agaro_admin_authed'] === true;
+
+if ($isAuthenticated) {
+    $pdo = getDB();
+    $adminTab = isset($_GET['admin_tab']) ? $_GET['admin_tab'] : 'news';
+    
+    // Create tables if not exists
+    if ($pdo) {
+        try {
+            // News table
+            $pdo->exec("CREATE TABLE IF NOT EXISTS news (
+                id VARCHAR(255) PRIMARY KEY,
+                category VARCHAR(255),
+                date DATE,
+                image VARCHAR(255),
+                title_en TEXT, title_om TEXT, title_am TEXT,
+                excerpt_en TEXT, excerpt_om TEXT, excerpt_am TEXT,
+                content_en TEXT, content_om TEXT, content_am TEXT
+            )");
+            
+            // Events table with correct schema
+            $pdo->exec("CREATE TABLE IF NOT EXISTS events (
+                id VARCHAR(50) PRIMARY KEY,
+                category VARCHAR(50) DEFAULT 'General',
+                date DATE NOT NULL,
+                time TIME NOT NULL,
+                image VARCHAR(255),
+                title_en VARCHAR(255) NOT NULL,
+                title_om VARCHAR(255) NOT NULL,
+                title_am VARCHAR(255) NOT NULL,
+                excerpt_en TEXT,
+                excerpt_om TEXT,
+                excerpt_am TEXT,
+                location_en VARCHAR(255),
+                location_om VARCHAR(255),
+                location_am VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_date (date),
+                INDEX idx_category (category)
+            )");
+            
+            // Projects table
+            $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
+                id VARCHAR(50) PRIMARY KEY,
+                category VARCHAR(50) DEFAULT 'General',
+                name_en VARCHAR(255) NOT NULL,
+                name_om VARCHAR(255) NOT NULL,
+                name_am VARCHAR(255) NOT NULL,
+                description_en TEXT,
+                description_om TEXT,
+                description_am TEXT,
+                status ENUM('planning', 'ongoing', 'completed') DEFAULT 'planning',
+                progress INT DEFAULT 0,
+                budget VARCHAR(100),
+                manager VARCHAR(255),
+                kebele VARCHAR(50),
+                image VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_status (status),
+                INDEX idx_kebele (kebele)
+            )");
+        } catch (Exception $e) {}
+    }
+
+    // 1. Save or Update News Article
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_article'])) {
+        $id = $_POST['article_id'] ?: 'news-' . time();
+        $category = $_POST['category'];
+        
+        $image = $_POST['image'] ?? '';
+        if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = 'uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+            $fileName = time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $extension;
+            $targetPath = $uploadDir . $fileName;
+            if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+                $image = $targetPath;
+            }
+        }
+        
+        $date = date('Y-m-d');
+        
+        $title_en = $_POST['title_en'] ?? ''; $title_om = $_POST['title_om'] ?? ''; $title_am = $_POST['title_am'] ?? '';
+        $excerpt_en = $_POST['excerpt_en'] ?? ''; $excerpt_om = $_POST['excerpt_om'] ?? ''; $excerpt_am = $_POST['excerpt_am'] ?? '';
+        $content_en = $_POST['content_en'] ?? ''; $content_om = $_POST['content_om'] ?? ''; $content_am = $_POST['content_am'] ?? '';
+        
+        if ($pdo) {
+            try {
+                if ($_POST['article_id']) {
+                    $stmt = $pdo->prepare("UPDATE news SET category=?, image=?, title_en=?, title_om=?, title_am=?, excerpt_en=?, excerpt_om=?, excerpt_am=?, content_en=?, content_om=?, content_am=? WHERE id=?");
+                    $stmt->execute([$category, $image, $title_en, $title_om, $title_am, $excerpt_en, $excerpt_om, $excerpt_am, $content_en, $content_om, $content_am, $id]);
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO news (id, category, date, image, title_en, title_om, title_am, excerpt_en, excerpt_om, excerpt_am, content_en, content_om, content_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$id, $category, $date, $image, $title_en, $title_om, $title_am, $excerpt_en, $excerpt_om, $excerpt_am, $content_en, $content_om, $content_am]);
+                }
+                $toastMessage = "News article stored in database.";
+            } catch (Exception $e) { $toastMessage = "Save failed: " . $e->getMessage(); }
+        }
+    }
+    
+    // 2. Remove News Article
+    if (isset($_GET['delete_news'])) {
+        $delId = $_GET['delete_news'];
+        if ($pdo) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM news WHERE id = ?");
+                $stmt->execute([$delId]);
+                $toastMessage = "News removed from registries.";
+            } catch (Exception $e) { }
+        }
+        header("Location: admin_manage.php?admin_tab=news&toast=" . urlencode($toastMessage));
+        exit();
+    }
+
+    // 3. Save or Update Event
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
+        $id = $_POST['event_id'] ?: 'event-' . time();
+        $category = $_POST['category'];
+        
+        $image = $_POST['image'] ?? '';
+        if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = 'uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+            $fileName = time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $extension;
+            $targetPath = $uploadDir . $fileName;
+            if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+                $image = $targetPath;
+            }
+        }
+        
+        $date = $_POST['date'] ?: date('Y-m-d');
+        $time = $_POST['time'] ?: date('H:i:s');
+        
+        $title_en = $_POST['title_en'] ?? ''; $title_om = $_POST['title_om'] ?? ''; $title_am = $_POST['title_am'] ?? '';
+        $excerpt_en = $_POST['excerpt_en'] ?? ''; $excerpt_om = $_POST['excerpt_om'] ?? ''; $excerpt_am = $_POST['excerpt_am'] ?? '';
+        $location_en = $_POST['location_en'] ?? ''; $location_om = $_POST['location_om'] ?? ''; $location_am = $_POST['location_am'] ?? '';
+        
+        if ($pdo) {
+            try {
+                if ($_POST['event_id']) {
+                    $stmt = $pdo->prepare("UPDATE events SET category=?, image=?, title_en=?, title_om=?, title_am=?, excerpt_en=?, excerpt_om=?, excerpt_am=?, location_en=?, location_om=?, location_am=?, date=?, time=? WHERE id=?");
+                    $stmt->execute([$category, $image, $title_en, $title_om, $title_am, $excerpt_en, $excerpt_om, $excerpt_am, $location_en, $location_om, $location_am, $date, $time, $id]);
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO events (id, category, date, time, image, title_en, title_om, title_am, excerpt_en, excerpt_om, excerpt_am, location_en, location_om, location_am) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$id, $category, $date, $time, $image, $title_en, $title_om, $title_am, $excerpt_en, $excerpt_om, $excerpt_am, $location_en, $location_om, $location_am]);
+                }
+                $toastMessage = "Event stored in database.";
+            } catch (Exception $e) { $toastMessage = "Save failed: " . $e->getMessage(); }
+        }
+    }
+    
+    // 4. Remove Event
+    if (isset($_GET['delete_event'])) {
+        $delId = $_GET['delete_event'];
+        if ($pdo) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM events WHERE id = ?");
+                $stmt->execute([$delId]);
+                $toastMessage = "Event removed from registries.";
+            } catch (Exception $e) { }
+        }
+        header("Location: admin_manage.php?admin_tab=events&toast=" . urlencode($toastMessage));
+        exit();
+    }
+
+   // 5. Save or Update Project - FIXED VERSION
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_project'])) {
+    $id = $_POST['project_id'] ?: 'proj-' . time() . '-' . bin2hex(random_bytes(4));
+    $category = $_POST['category'] ?? 'General';
+    
+    // Handle image upload
+    $image = $_POST['image'] ?? '';
+    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'uploads/projects/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $extension = pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION);
+        $fileName = time() . '_' . substr(md5(uniqid()), 0, 8) . '.' . $extension;
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+            $image = $targetPath;
+        } else {
+            $toastMessage = "Failed to upload image.";
+        }
+    }
+    
+    $name_en = $_POST['name_en'] ?? '';
+    $name_om = $_POST['name_om'] ?? '';
+    $name_am = $_POST['name_am'] ?? '';
+    $description_en = $_POST['description_en'] ?? '';
+    $description_om = $_POST['description_om'] ?? '';
+    $description_am = $_POST['description_am'] ?? '';
+    $status = $_POST['status'] ?? 'planning';
+    $progress = (int)($_POST['progress'] ?? 0);
+    $budget = $_POST['budget'] ?? '0 ETB';
+    $manager = $_POST['manager'] ?? '';
+    $kebele = $_POST['kebele'] ?? '';
+    
+    if ($pdo) {
+        try {
+            if ($_POST['project_id']) {
+                $stmt = $pdo->prepare("UPDATE projects SET 
+                    category=?, name_en=?, name_om=?, name_am=?, 
+                    description_en=?, description_om=?, description_am=?, 
+                    status=?, progress=?, budget=?, manager=?, kebele=?, image=? 
+                    WHERE id=?");
+                $stmt->execute([
+                    $category, $name_en, $name_om, $name_am,
+                    $description_en, $description_om, $description_am,
+                    $status, $progress, $budget, $manager, $kebele, $image,
+                    $id
+                ]);
+            } else {
+                $stmt = $pdo->prepare("INSERT INTO projects 
+                    (id, category, name_en, name_om, name_am, 
+                     description_en, description_om, description_am, 
+                     status, progress, budget, manager, kebele, image) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([
+                    $id, $category, $name_en, $name_om, $name_am,
+                    $description_en, $description_om, $description_am,
+                    $status, $progress, $budget, $manager, $kebele, $image
+                ]);
+            }
+            $toastMessage = "Project stored in database.";
+        } catch (Exception $e) { 
+            $toastMessage = "Save failed: " . $e->getMessage(); 
+        }
+    }
+}
+    }
+    
+    // 6. Remove Project
+    if (isset($_GET['delete_project'])) {
+        $delId = $_GET['delete_project'];
+        if ($pdo) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ?");
+                $stmt->execute([$delId]);
+                $toastMessage = "Project removed from registries.";
+            } catch (Exception $e) { }
+        }
+        header("Location: admin_manage.php?admin_tab=projects&toast=" . urlencode($toastMessage));
+        exit();
+    }
+
+    // --- FETCH DATA FOR DISPLAYS ---
+    $newsList = []; $eventsList = []; $projectsList = [];
+    if ($pdo) {
+        try {
+            $newsList = $pdo->query("SELECT * FROM news ORDER BY date DESC")->fetchAll();
+        } catch (Exception $e) {}
+        
+        try {
+            $eventsList = $pdo->query("SELECT * FROM events ORDER BY date DESC")->fetchAll();
+        } catch (Exception $e) {}
+        
+        try {
+            $projectsList = $pdo->query("SELECT * FROM projects ORDER BY created_at DESC")->fetchAll();
+        } catch (Exception $e) {}
+    }
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agaro Executive Administration Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: {500: '#ca8a04', 600: '#b47b01'},
+                            green: {700: '#15803d', 800: '#14532d'}
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased flex flex-col font-sans">
+
+    <?php if (!$isAuthenticated): ?>
+        <!-- SECURE PORTAL LOGIN WALL -->
+        <main class="max-w-md mx-auto py-24 px-4 font-sans space-y-6 w-full">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xl p-8 space-y-6">
+                <div class="text-center space-y-1">
+                    <span class="block text-xl">🛡️</span>
+                    <h2 class="font-display font-extrabold text-2xl text-slate-900 tracking-tight">Executive Admin Log-in</h2>
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">Access Agaro central administration databases, verify civic requests, and update Cabinet portfolios.</p>
+                </div>
+
+                <?php if ($authError): ?>
+                    <div class="bg-rose-50 border border-rose-150 rounded-xl p-4 text-xs text-rose-700 font-semibold text-center">
+                        <?php echo htmlspecialchars($authError); ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="login_submit" value="1" />
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase tracking-wider">Username ID Handle</label>
+                        <input type="text" required name="username" placeholder="e.g. admin" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-slate-600 uppercase tracking-wider">Secret Password Pin</label>
+                        <input type="password" required name="password" placeholder="••••••••" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                    </div>
+
+                    <button type="submit" class="w-full bg-brand-green-700 text-white font-bold py-3 px-4 rounded-xl text-xs.5 hover:bg-brand-green-800 transition-colors cursor-pointer">
+                        Authorize Secure Console
+                    </button>
+                </form>
+
+                <div class="h-px bg-slate-100 my-2"></div>
+                <div class="text-center">
+                    <a href="?bypass=1" class="text-[11px] font-bold text-brand-gold-500 hover:underline">⚡ Fast Pass (Bypass for Tests)</a>
+                    <p class="text-[10px] text-slate-400 mt-2">Credentials: admin / agaro2026</p>
+                </div>
+            </div>
+        </main>
+    <?php else: ?>
+
+        <!-- LOGGED-IN EXECUTIVE PANEL -->
+        <header class="bg-slate-900 border-b border-slate-800 text-white p-6.5 p-8 shadow-md">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 select-none">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="block h-2.5 w-2.5 bg-brand-gold-500 rounded-full animate-pulse"></span>
+                        <span class="text-[9px] font-bold tracking-widest text-[#ca8a04] uppercase font-mono">Agaro Central Executive Panel</span>
+                    </div>
+                    <h1 class="font-display text-2.5xl font-extrabold text-white tracking-tight">System Administrator Workspace</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="?logout=1" class="bg-slate-800 border border-slate-700 text-rose-450 hover:bg-rose-950 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors">Sign Out Desk</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8 md:py-10 flex flex-col gap-8 w-full">
+            
+            <?php if ($toastMessage || isset($_GET['toast'])): ?>
+                <div class="bg-slate-900 text-brand-gold-500 border border-slate-800 p-4 rounded-xl text-xs font-mono font-bold select-none animate-fade-in flex items-center gap-2">
+                    <span>🛡️</span>
+                    <span><?php echo htmlspecialchars($toastMessage ?: $_GET['toast']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Navigation Tabs -->
+            <div class="flex bg-white border border-slate-205 p-1 rounded-2xl gap-2 overflow-x-auto select-none shadow-subtle shrink-0">
+                <a href="?admin_tab=news" class="flex-1 text-center py-3 text-xs font-bold rounded-xl whitespace-nowrap <?php echo ($adminTab === 'news') ? 'bg-brand-green-700 text-white font-black' : 'text-slate-600 hover:bg-slate-100'; ?>">📰 News</a>
+                <a href="?admin_tab=events" class="flex-1 text-center py-3 text-xs font-bold rounded-xl whitespace-nowrap <?php echo $adminTab === 'events' ? 'bg-brand-green-700 text-white font-black' : 'text-slate-600 hover:bg-slate-100'; ?>">📅 Events</a>
+                <a href="?admin_tab=projects" class="flex-1 text-center py-3 text-xs font-bold rounded-xl whitespace-nowrap <?php echo $adminTab === 'projects' ? 'bg-brand-green-700 text-white font-black' : 'text-slate-600 hover:bg-slate-100'; ?>">🏗️ Projects</a>
+            </div>
+
+            <!-- TAB: NEWS -->
+            <?php if ($adminTab === 'news'): ?>
+                <div class="space-y-8 animate-fade-in">
+                    <!-- Publisher form -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                        <h3 class="font-display font-extrabold text-xl text-[#ca8a04]">Publish News Release</h3>
+                        
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="save_article" value="1" />
+                            <input type="hidden" name="article_id" id="article_id" value="" />
+                            
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Sector Category</label>
+                                    <select required name="category" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none">
+                                        <option value="Infrastructure">Infrastructure Development</option>
+                                        <option value="Health">Health & Sanitation</option>
+                                        <option value="Agriculture">Agriculture & Coffee cooperative</option>
+                                        <option value="Municipal">Municipal Service Upgrade</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Upload Image</label>
+                                    <input type="file" name="image_file" accept="image/*" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 focus:bg-white focus:outline-none" />
+                                    <input type="hidden" name="image" value="" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (English)*</label>
+                                    <input type="text" required name="title_en" placeholder="English Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (Afan Oromo)*</label>
+                                    <input type="text" required name="title_om" placeholder="Afaan Oromoo Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (Amharic)*</label>
+                                    <input type="text" required name="title_am" placeholder="Amharic Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (English)*</label>
+                                    <textarea required rows="2" name="excerpt_en" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (Afan Oromo)*</label>
+                                    <textarea required rows="2" name="excerpt_om" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (Amharic)*</label>
+                                    <textarea required rows="2" name="excerpt_am" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Story (English)*</label>
+                                    <textarea required rows="4" name="content_en" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Story (Afan Oromo)*</label>
+                                    <textarea required rows="4" name="content_om" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Story (Amharic)*</label>
+                                    <textarea required rows="4" name="content_am" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-brand-green-700 hover:bg-brand-green-800 text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow cursor-pointer">
+                                    Publish News
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- News Table list -->
+                    <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 pl-6">Title</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Publish Date</th>
+                                    <th class="p-4 text-right pr-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs.5 font-medium">
+                                <?php foreach ($newsList as $item): ?>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-4 pl-6 font-bold text-slate-800"><?php echo htmlspecialchars($item['title_en'] ?? ''); ?></td>
+                                        <td class="p-4"><span class="bg-brand-green-50 text-brand-green-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold"><?php echo htmlspecialchars($item['category'] ?? ''); ?></span></td>
+                                        <td class="p-4 font-mono text-slate-500"><?php echo htmlspecialchars($item['date'] ?? ''); ?></td>
+                                        <td class="p-4 text-right pr-6">
+                                            <a href="?admin_tab=news&delete_news=<?php echo urlencode($item['id'] ?? ''); ?>" onclick="return confirm('Remove news?')" class="text-rose-600 hover:underline">Remove</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- TAB: EVENTS -->
+            <?php if ($adminTab === 'events'): ?>
+                <div class="space-y-8 animate-fade-in">
+                    <!-- Publisher form -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                        <h3 class="font-display font-extrabold text-xl text-[#ca8a04]">Create Event</h3>
+                        
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="save_event" value="1" />
+                            <input type="hidden" name="event_id" id="event_id" value="" />
+                            
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Event Date</label>
+                                    <input type="date" required name="date" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Event Time</label>
+                                    <input type="time" required name="time" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Category</label>
+                                    <select required name="category" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none">
+                                        <option value="Community">Community Event</option>
+                                        <option value="Festival">Festival</option>
+                                        <option value="Meeting">Public Meeting</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Upload Image</label>
+                                    <input type="file" name="image_file" accept="image/*" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 focus:bg-white focus:outline-none" />
+                                    <input type="hidden" name="image" value="" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Location (English)</label>
+                                    <input type="text" name="location_en" placeholder="Location in English" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Location (Afan Oromo)</label>
+                                    <input type="text" name="location_om" placeholder="Location in Afan Oromo" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (English)*</label>
+                                    <input type="text" required name="title_en" placeholder="English Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (Afan Oromo)*</label>
+                                    <input type="text" required name="title_om" placeholder="Afaan Oromoo Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Title (Amharic)*</label>
+                                    <input type="text" required name="title_am" placeholder="Amharic Title" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (English)*</label>
+                                    <textarea required rows="2" name="excerpt_en" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (Afan Oromo)*</label>
+                                    <textarea required rows="2" name="excerpt_om" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Excerpt (Amharic)*</label>
+                                    <textarea required rows="2" name="excerpt_am" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Location (Amharic)</label>
+                                    <input type="text" name="location_am" placeholder="Location in Amharic" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-brand-green-700 hover:bg-brand-green-800 text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow cursor-pointer">
+                                    Publish Event
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Events Table list -->
+                    <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 pl-6">Title</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Event Date</th>
+                                    <th class="p-4">Event Time</th>
+                                    <th class="p-4 text-right pr-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs.5 font-medium">
+                                <?php foreach ($eventsList as $item): ?>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-4 pl-6 font-bold text-slate-800"><?php echo htmlspecialchars($item['title_en'] ?? ''); ?></td>
+                                        <td class="p-4"><span class="bg-brand-green-50 text-brand-green-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold"><?php echo htmlspecialchars($item['category'] ?? ''); ?></span></td>
+                                        <td class="p-4 font-mono text-slate-500"><?php echo htmlspecialchars($item['date'] ?? ''); ?></td>
+                                        <td class="p-4 font-mono text-slate-500"><?php echo htmlspecialchars($item['time'] ?? ''); ?></td>
+                                        <td class="p-4 text-right pr-6">
+                                            <a href="?admin_tab=events&delete_event=<?php echo urlencode($item['id'] ?? ''); ?>" onclick="return confirm('Remove event?')" class="text-rose-600 hover:underline">Remove</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- TAB: PROJECTS -->
+            <?php if ($adminTab === 'projects'): ?>
+                <div class="space-y-8 animate-fade-in">
+                    <!-- Project form -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                        <h3 class="font-display font-extrabold text-xl text-[#ca8a04]">Create/Edit Project</h3>
+                        
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            <input type="hidden" name="save_project" value="1" />
+                            <input type="hidden" name="project_id" id="project_id" value="" />
+                            
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Category</label>
+                                    <select required name="category" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none">
+                                        <option value="Infrastructure">Infrastructure</option>
+                                        <option value="Health">Health</option>
+                                        <option value="Education">Education</option>
+                                        <option value="Water">Water</option>
+                                        <option value="Market">Market</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Status</label>
+                                    <select required name="status" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none">
+                                        <option value="planning">Planning Stage</option>
+                                        <option value="ongoing">In Progress</option>
+                                        <option value="completed">Fully Commissioned</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Progress (%)</label>
+                                    <input type="number" min="0" max="100" name="progress" value="0" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Project Name (English)*</label>
+                                    <input type="text" required name="name_en" placeholder="Project Name in English" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Project Name (Afan Oromo)*</label>
+                                    <input type="text" required name="name_om" placeholder="Maqaa Pirojektichaa Afaan Oromoon" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Project Name (Amharic)*</label>
+                                    <input type="text" required name="name_am" placeholder="የፕሮጀክት ስም በአማርኛ" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-3">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Description (English)*</label>
+                                    <textarea required rows="2" name="description_en" placeholder="Project description in English" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Description (Afan Oromo)*</label>
+                                    <textarea required rows="2" name="description_om" placeholder="Ibsa Pirojektichaa Afaan Oromoon" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase font-mono">Description (Amharic)*</label>
+                                    <textarea required rows="2" name="description_am" placeholder="የፕሮጀክት መግለጫ በአማርኛ" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid gap-4 sm:grid-cols-4">
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Budget</label>
+                                    <input type="text" name="budget" placeholder="e.g., 45,000,000 ETB" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Project Manager</label>
+                                    <input type="text" name="manager" placeholder="Full name" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Kebele</label>
+                                    <input type="text" name="kebele" placeholder="e.g., Kebele 03" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none" />
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-bold text-slate-600 uppercase">Upload Image</label>
+                                    <input type="file" name="image_file" accept="image/*" class="w-full text-xs.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 focus:bg-white focus:outline-none" />
+                                    <input type="hidden" name="image" value="" />
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="bg-brand-green-700 hover:bg-brand-green-800 text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow cursor-pointer">
+                                    Save Project
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Projects Table list -->
+                    <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-4 pl-6">Project Name</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4">Progress</th>
+                                    <th class="p-4">Budget</th>
+                                    <th class="p-4 text-right pr-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs.5 font-medium">
+                                <?php foreach ($projectsList as $item): ?>
+                                    <tr class="hover:bg-slate-50">
+                                        <td class="p-4 pl-6 font-bold text-slate-800"><?php echo htmlspecialchars($item['name_en'] ?? ''); ?></td>
+                                        <td class="p-4"><span class="bg-brand-green-50 text-brand-green-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold"><?php echo htmlspecialchars($item['category'] ?? ''); ?></span></td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold 
+                                                <?php 
+                                                    if ($item['status'] === 'completed') echo 'bg-emerald-50 text-emerald-700';
+                                                    elseif ($item['status'] === 'ongoing') echo 'bg-blue-50 text-blue-700';
+                                                    else echo 'bg-amber-50 text-amber-700';
+                                                ?>">
+                                                <?php echo htmlspecialchars($item['status'] ?? ''); ?>
+                                            </span>
+                                        </td>
+                                        <td class="p-4 font-mono text-slate-600"><?php echo htmlspecialchars($item['progress'] ?? 0); ?>%</td>
+                                        <td class="p-4 font-mono text-slate-600"><?php echo htmlspecialchars($item['budget'] ?? 'N/A'); ?></td>
+                                        <td class="p-4 text-right pr-6">
+                                            <a href="?admin_tab=projects&delete_project=<?php echo urlencode($item['id'] ?? ''); ?>" onclick="return confirm('Remove project?')" class="text-rose-600 hover:underline">Remove</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+        </main>
+    <?php endif; ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview for project upload
+    const imageInput = document.querySelector('input[name="image_file"]');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    let preview = document.getElementById('image-preview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.id = 'image-preview';
+                        preview.className = 'mt-2';
+                        imageInput.parentNode.appendChild(preview);
+                    }
+                    preview.innerHTML = `
+                        <img src="${event.target.result}" 
+                             alt="Project Image" 
+                             style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e2e8f0;" />
+                        <p class="text-xs text-slate-500 mt-1">${file.name}</p>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

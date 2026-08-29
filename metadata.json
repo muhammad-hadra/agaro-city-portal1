@@ -1,0 +1,6 @@
+{
+  "name": "Agaro City Administration Portal",
+  "description": "The official digital gateway to city services, transparent governance, and community life in Agaro, Jimma Zone, Ethiopia.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

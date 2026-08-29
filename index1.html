@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Agaro City Administration - Serving our community with excellence and integrity. Official digital portal." />
+<title>Agaro City Administration | Official Portal</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root{
+  --primary:#0f3a57;
+  --primary-light:#1a5276;
+  --accent:#f39c12;
+  --accent-hover:#e67e22;
+  --success:#27ae60;
+  --danger:#e74c3c;
+  --bg:#ffffff;
+  --bg-alt:#f8fafc;
+  --bg-dark:#081f31;
+  --text:#1e293b;
+  --text-light:#64748b;
+  --border:#e2e8f0;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.05);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg:0 12px 30px rgba(0,0,0,.12);
+  --radius:8px;
+  --radius-lg:12px;
+  --transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;color:var(--primary);line-height:1.2;font-weight:700}
+h1{font-size:clamp(2.2rem,4.5vw,3.5rem)}
+h2{font-size:clamp(1.8rem,3vw,2.5rem)}
+h3{font-size:1.25rem;font-family:'Inter',sans-serif;font-weight:700}
+.container{width:min(1280px,92%);margin-inline:auto}
+
+/* Top Bar */
+.topbar{background:var(--primary);color:rgba(255,255,255,.9);font-size:.85rem;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.topbar-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.topbar-left{display:flex;gap:20px;flex-wrap:wrap}
+.topbar-left span{display:inline-flex;align-items:center;gap:6px}
+.topbar-left i{color:var(--accent)}
+.topbar-right{display:flex;gap:8px}
+.topbar-right a{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:var(--transition)}
+.topbar-right a:hover{background:var(--accent);color:var(--primary)}
+
+/* Navigation */
+.navbar{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.98);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.nav-wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.logo{display:flex;align-items:center;gap:12px;font-family:'Inter',sans-serif;font-weight:800;font-size:1.15rem;color:var(--primary)}
+.logo-mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);display:grid;place-items:center;color:#fff;font-weight:900;font-size:1.1rem;position:relative;overflow:hidden}
+.logo-mark::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(243,156,18,.3) 100%)}
+.logo small{display:block;font-size:.65rem;letter-spacing:.2em;color:var(--text-light);font-weight:600;text-transform:uppercase}
+
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{padding:10px 16px;border-radius:var(--radius);font-weight:500;font-size:.92rem;color:var(--text);transition:var(--transition)}
+.nav-links a:hover{color:var(--primary);background:var(--bg-alt)}
+.nav-links a.active{color:var(--primary);background:rgba(15,58,87,.06);font-weight:600}
+
+.nav-actions{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius);font-weight:600;font-size:.92rem;transition:var(--transition);cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-light);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.btn-outline{border:2px solid var(--primary);color:var(--primary);background:transparent}
+.btn-outline:hover{background:var(--primary);color:#fff}
+.btn-ghost{color:var(--primary);padding:8px 12px}
+.btn-ghost:hover{background:var(--bg-alt)}
+.btn-sm{padding:8px 16px;font-size:.85rem}
+
+.hamburger{display:none;width:42px;height:42px;border-radius:var(--radius);background:var(--bg-alt);align-items:center;justify-content:center;color:var(--primary);font-size:1.15rem}
+
+/* Views */
+.view{display:none;animation:fadeIn .4s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hero Section */
+.hero{position:relative;background:linear-gradient(135deg,var(--primary) 0%,#0a2a42 100%);color:#fff;padding:100px 0 80px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;opacity:.05;background-image:radial-gradient(circle,#fff 1px,transparent 2px);background-size:40px 40px}
+.hero-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;position:relative;z-index:2}
+.hero-content .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);font-size:.82rem;font-weight:500;margin-bottom:24px;backdrop-filter:blur(8px)}
+.hero-content .badge i{color:var(--accent)}
+.hero h1{color:#fff;margin-bottom:20px}
+.hero h1 span{color:var(--accent)}
+.hero p.lead{font-size:1.1rem;color:rgba(255,255,255,.85);max-width:540px;margin-bottom:32px;line-height:1.7}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:40px}
+
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-lg);padding:24px;margin-top:40px}
+.hero-stat{text-align:center;border-right:1px solid rgba(255,255,255,.15)}
+.hero-stat:last-child{border-right:none}
+.hero-stat .num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+.hero-stat .lbl{font-size:.78rem;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.08em;font-weight:500}
+
+/* Section Styling */
+.section{padding:80px 0}
+.section-alt{background:var(--bg-alt)}
+.section-head{text-align:center;max-width:700px;margin:0 auto 50px}
+.section-head .eyebrow{display:inline-block;font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:12px}
+.section-head h2{margin-bottom:16px}
+.section-head p{color:var(--text-light);font-size:1.05rem}
+
+/* Leadership Spotlight */
+.leadership{display:grid;grid-template-columns:300px 1fr;gap:50px;align-items:center;background:#fff;border-radius:var(--radius-lg);padding:40px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.leadership-img{position:relative}
+.leadership-img img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:var(--radius-lg);box-shadow:var(--shadow-md)}
+.leadership-img .badge{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 20px;border-radius:999px;font-weight:700;font-size:.85rem;white-space:nowrap;box-shadow:var(--shadow-md)}
+.leadership-content .eyebrow{color:var(--accent);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.leadership-content h3{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:8px;color:var(--primary)}
+.leadership-content .title{color:var(--text-light);font-weight:500;margin-bottom:20px;font-size:1.05rem}
+.leadership-content blockquote{font-size:1.15rem;font-style:italic;color:var(--text);line-height:1.7;margin-bottom:24px;padding-left:20px;border-left:4px solid var(--accent)}
+.leadership-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
+.l-stat{text-align:center;padding:16px;background:var(--bg-alt);border-radius:var(--radius)}
+.l-stat .val{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--primary)}
+.l-stat .lbl{font-size:.75rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+
+/* Services Grid */
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.service-card{background:#fff;padding:32px;border-radius:var(--radius-lg);border:1px solid var(--border);transition:var(--transition);position:relative;overflow:hidden}
+.service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:transparent}
+.service-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+.service-card:hover::before{transform:scaleX(1)}
+.service-card h3{margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.service-card h3 i{color:var(--accent);font-size:1.3rem}
+.service-card p{color:var(--text-light);font-size:.92rem;margin-bottom:16px;line-height:1.6}
+.service-card ul{list-style:none;margin-bottom:20px}
+.service-card ul li{padding:6px 0;font-size:.9rem;color:var(--text);display:flex;align-items:center;gap:8px}
+.service-card ul li::before{content:"•";color:var(--accent);font-weight:700;font-size:1.2rem}
+.service-card .link{color:var(--primary);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:6px;transition:gap .2s ease}
+.service-card:hover .link{gap:10px;color:var(--accent)}
+
+.support-box{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:#fff;padding:40px;border-radius:var(--radius-lg);text-align:center;margin-top:40px}
+.support-box h3{color:#fff;font-size:1.5rem;margin-bottom:12px;font-family:'Inter',sans-serif}
+.support-box p{color:rgba(255,255,255,.85);margin-bottom:24px;max-width:600px;margin-inline:auto}
+.support-box .btn{background:#fff;color:var(--primary)}
+.support-box .btn:hover{background:var(--accent);color:#fff}
+
+/* By The Numbers */
+.numbers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;text-align:center}
+.number-card{padding:30px 20px;background:#fff;border-radius:var(--radius-lg);border:1px solid var(--border);transition:var(--transition)}
+.number-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+.number-card i{font-size:2rem;color:var(--accent);margin-bottom:16px}
+.number-card .val{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+.number-card .lbl{font-size:.9rem;color:var(--text-light);font-weight:500}
+
+/* Achievements */
+.achievements-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.achievements-content h3{font-size:1.5rem;margin-bottom:16px;font-family:'Inter',sans-serif}
+.achievements-content p{color:var(--text-light);margin-bottom:24px;line-height:1.7}
+.achievement-stats{display:flex;gap:30px;margin-bottom:24px}
+.a-stat .val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--accent)}
+.a-stat .lbl{font-size:.85rem;color:var(--text-light)}
+.awards-list{display:flex;flex-direction:column;gap:16px}
+.award-item{display:flex;gap:16px;align-items:flex-start;padding:20px;background:#fff;border-radius:var(--radius);border:1px solid var(--border);transition:var(--transition)}
+.award-item:hover{border-color:var(--accent);box-shadow:var(--shadow-sm)}
+.award-year{background:var(--primary);color:#fff;padding:6px 12px;border-radius:var(--radius);font-weight:700;font-size:.85rem;white-space:nowrap}
+.award-info h4{font-family:'Inter',sans-serif;font-size:1rem;margin-bottom:4px;color:var(--primary)}
+.award-info p{font-size:.88rem;color:var(--text-light);margin:0}
+
+/* News Tabs */
+.news-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:32px;flex-wrap:wrap}
+.news-tab{padding:10px 24px;border-radius:999px;background:transparent;border:1.5px solid var(--border);font-weight:600;font-size:.9rem;color:var(--text-light);transition:var(--transition)}
+.news-tab:hover{border-color:var(--primary);color:var(--primary)}
+.news-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.news-card{background:#fff;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);transition:var(--transition);display:flex;flex-direction:column}
+.news-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:transparent}
+.news-img{height:200px;overflow:hidden;position:relative}
+.news-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.news-card:hover .news-img img{transform:scale(1.05)}
+.news-img .tag{position:absolute;top:16px;left:16px;background:var(--accent);color:#fff;padding:5px 12px;border-radius:999px;font-size:.75rem;font-weight:700;text-transform:uppercase}
+.news-body{padding:24px;flex:1;display:flex;flex-direction:column}
+.news-meta{display:flex;gap:12px;font-size:.8rem;color:var(--text-light);margin-bottom:10px}
+.news-meta i{color:var(--accent)}
+.news-body h3{font-size:1.15rem;margin-bottom:10px;line-height:1.4}
+.news-body p{color:var(--text-light);font-size:.9rem;flex:1;margin-bottom:16px}
+.news-body .link{color:var(--primary);font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+
+/* Newsletter */
+.newsletter{background:var(--bg-alt);padding:60px 0;text-align:center;border-top:1px solid var(--border)}
+.newsletter h3{font-family:'Inter',sans-serif;font-size:1.5rem;margin-bottom:12px}
+.newsletter p{color:var(--text-light);margin-bottom:24px}
+.newsletter-form{display:flex;max-width:500px;margin:0 auto;gap:10px}
+.newsletter-form input{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.95rem}
+.newsletter-form input:focus{outline:none;border-color:var(--primary)}
+.newsletter-form button{padding:12px 24px;background:var(--primary);color:#fff;border-radius:var(--radius);font-weight:600;white-space:nowrap}
+
+/* Footer */
+.footer{background:var(--bg-dark);color:#fff;padding:70px 0 0}
+.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:50px}
+.footer-col h4{color:#fff;font-size:1.05rem;margin-bottom:20px;position:relative;padding-bottom:12px;font-family:'Inter',sans-serif}
+.footer-col h4::after{content:"";position:absolute;left:0;bottom:0;width:40px;height:3px;background:var(--accent);border-radius:2px}
+.footer-col p{color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:16px;line-height:1.7}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:10px}
+.footer-col ul a{color:rgba(255,255,255,.7);font-size:.9rem;transition:var(--transition);display:inline-flex;align-items:center;gap:6px}
+.footer-col ul a:hover{color:var(--accent);transform:translateX(4px)}
+.footer-col ul a i{font-size:.65rem;color:var(--accent)}
+
+.footer-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px;font-family:'Inter',sans-serif;font-weight:800;font-size:1.2rem;color:#fff}
+.footer-logo .logo-mark{width:44px;height:44px}
+
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding:24px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:.85rem;color:rgba(255,255,255,.6)}
+.footer-bottom .powered{display:flex;align-items:center;gap:6px}
+.footer-bottom .powered i{color:var(--danger)}
+
+/* Admin Layout */
+.admin-layout{display:none;min-height:100vh;background:#f1f5f9}
+.admin-layout.active{display:grid;grid-template-columns:260px 1fr}
+.sidebar{background:var(--bg-dark);color:#fff;padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{padding:0 22px 20px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.sidebar-logo .logo-mark{width:40px;height:40px;font-size:1rem}
+.sidebar-logo h4{color:#fff;font-size:1rem;margin-bottom:2px;font-family:'Inter',sans-serif}
+.sidebar-logo small{color:var(--accent);font-size:.65rem;letter-spacing:.2em}
+.sidebar-user{padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sidebar-user .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);color:var(--primary);display:grid;place-items:center;font-weight:700}
+.sidebar-user .info{flex:1}
+.sidebar-user h5{color:#fff;font-size:.88rem;margin-bottom:1px}
+.sidebar-user span{font-size:.72rem;color:rgba(255,255,255,.6)}
+.sidebar-menu{list-style:none;padding:0 10px}
+.sidebar-menu li{margin-bottom:2px}
+.sidebar-menu a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius);color:rgba(255,255,255,.75);font-size:.9rem;font-weight:500;transition:var(--transition)}
+.sidebar-menu a:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-menu a.active{background:var(--accent);color:var(--primary);font-weight:600}
+.sidebar-menu a i{width:20px;text-align:center}
+.sidebar-menu .divider{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);padding:14px 14px 6px;font-weight:600}
+
+.admin-main{min-width:0}
+.admin-topbar{background:#fff;padding:14px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.admin-topbar .page-title h2{font-size:1.2rem;margin-bottom:2px;font-family:'Inter',sans-serif}
+.admin-topbar .page-title span{font-size:.82rem;color:var(--text-light)}
+.admin-content{padding:28px}
+
+/* Admin Components */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:28px}
+.stat-card{background:#fff;padding:22px;border-radius:var(--radius);border:1px solid var(--border);transition:var(--transition)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat-card .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.stat-card .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:1.2rem;color:#fff}
+.stat-card .ic.blue{background:linear-gradient(135deg,#1a5276,#3498db)}
+.stat-card .ic.green{background:linear-gradient(135deg,#27ae60,#2ecc71)}
+.stat-card .ic.orange{background:linear-gradient(135deg,#e67e22,#f39c12)}
+.stat-card .ic.red{background:linear-gradient(135deg,#c0392b,#e74c3c)}
+.stat-card .val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--primary);line-height:1}
+.stat-card .lbl{font-size:.82rem;color:var(--text-light);margin-top:4px}
+
+.table-wrap{background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.table-toolbar{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.table-toolbar .search{position:relative;flex:1;min-width:200px;max-width:320px}
+.table-toolbar .search input{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.88rem}
+.table-toolbar .search input:focus{outline:none;border-color:var(--primary)}
+.table-toolbar .search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-light)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+table thead{background:var(--bg-alt)}
+table th{padding:12px 16px;text-align:left;font-weight:600;color:var(--text);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+table td{padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+table tbody tr:hover{background:var(--bg-alt)}
+.table-img{width:44px;height:44px;border-radius:8px;object-fit:cover}
+.table-actions{display:flex;gap:6px}
+.table-actions button{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;transition:var(--transition)}
+.table-actions .edit{background:rgba(52,152,219,.1);color:#3498db}
+.table-actions .edit:hover{background:#3498db;color:#fff}
+.table-actions .delete{background:rgba(231,76,60,.1);color:#e74c3c}
+.table-actions .delete:hover{background:#e74c3c;color:#fff}
+
+/* Modal & Toast */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,58,87,.6);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius-lg);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:1.15rem;font-family:'Inter',sans-serif}
+.modal-close{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:var(--text-light);transition:var(--transition)}
+.modal-close:hover{background:var(--bg-alt);color:var(--danger)}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+.toast-container{position:fixed;top:90px;right:20px;z-index:3000;display:flex;flex-direction:column;gap:10px}
+.toast{background:#fff;padding:14px 18px;border-radius:var(--radius);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px;min-width:280px;border-left:4px solid var(--success);animation:slideIn .3s ease}
+.toast.error{border-left-color:var(--danger)}
+.toast i{font-size:1.2rem}
+.toast.success i{color:var(--success)}
+.toast.error i{color:var(--danger)}
+.toast .msg{flex:1;font-size:.9rem}
+.toast .close{color:var(--text-light);cursor:pointer}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+
+/* Admin Login */
+.admin-login-view{min-height:100vh;display:grid;place-items:center;padding:40px 20px;background:linear-gradient(135deg,var(--primary) 0%,#0a2a42 100%);position:relative}
+.admin-login-view::before{content:"";position:absolute;inset:0;opacity:.05;background-image:radial-gradient(circle,#fff 1px,transparent 2px);background-size:50px 50px}
+.login-card{background:#fff;padding:40px;border-radius:var(--radius-lg);max-width:440px;width:100%;box-shadow:var(--shadow-lg);position:relative;z-index:2}
+.login-card .logo{justify-content:center;margin-bottom:24px}
+.login-card h2{text-align:center;margin-bottom:6px;font-size:1.5rem;font-family:'Inter',sans-serif}
+.login-card .subtitle{text-align:center;color:var(--text-light);font-size:.9rem;margin-bottom:28px}
+.login-card .form-group{margin-bottom:16px}
+.login-card .form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}
+.login-card .form-group input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.95rem}
+.login-card .form-group input:focus{outline:none;border-color:var(--primary)}
+.login-card button[type=submit]{width:100%;justify-content:center;padding:13px;font-size:.95rem;margin-top:6px}
+.login-hint{background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.3);padding:12px;border-radius:var(--radius);margin-top:18px;font-size:.82rem}
+.login-hint code{background:#fff;padding:2px 6px;border-radius:4px;font-size:.8rem;font-weight:600}
+
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:.95rem;transition:var(--transition)}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,58,87,.1)}
+.form-group textarea{resize:vertical;min-height:110px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Responsive */
+@media (max-width:1024px){
+  .hero-grid,.leadership,.achievements-grid{grid-template-columns:1fr;gap:40px}
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .hero-stat:nth-child(2){border-right:none}
+  .leadership-img{max-width:300px;margin:0 auto}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .admin-layout.active{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:-100%;top:0;width:260px;z-index:1500;transition:left .3s ease}
+  .sidebar.open{left:0}
+  .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1400;display:none}
+  .sidebar-overlay.show{display:block}
+}
+@media (max-width:768px){
+  .nav-links,.topbar-left{display:none}
+  .hamburger{display:flex}
+  .nav-links.mobile-open{display:flex;position:absolute;top:76px;left:0;right:0;flex-direction:column;background:#fff;padding:16px;gap:4px;box-shadow:var(--shadow-md);border-top:1px solid var(--border)}
+  .nav-links.mobile-open a{width:100%;padding:12px 16px}
+  .form-row{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .hero-stat{border-right:none;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:16px}
+  .hero-stat:nth-last-child(-n+2){border-bottom:none;padding-bottom:0}
+  .leadership-stats{grid-template-columns:1fr 1fr}
+  .newsletter-form{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- PUBLIC PORTAL -->
+<div id="publicPortal">
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-left">
+        <span><i class="fa-solid fa-location-dot"></i> Agaro, Jimma Zone, Oromia</span>
+        <span><i class="fa-solid fa-phone"></i> +251 (0) 000 000 000</span>
+        <span><i class="fa-regular fa-clock"></i> Mon-Fri: 8:30 AM - 5:30 PM</span>
+      </div>
+      <div class="topbar-right">
+        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="#/home" class="logo">
+        <div class="logo-mark">A</div>
+        <div>Agaro City<small>Administration</small></div>
+      </a>
+      <nav aria-label="Primary">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#/home" data-route="home">Home</a></li>
+          <li><a href="#/services" data-route="services">Services</a></li>
+          <li><a href="#/projects" data-route="projects">Projects</a></li>
+          <li><a href="#/news" data-route="news">News</a></li>
+          <li><a href="#/contact" data-route="contact">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-actions">
+        <a href="#/admin" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-shield"></i> Admin</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME VIEW -->
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <span class="badge"><i class="fa-solid fa-shield-halved"></i> Official Government Portal</span>
+          <h1>Serving Agaro City with <span>Excellence</span> & Integrity</h1>
+          <p class="lead">Access all city services, track development projects, and stay informed about the latest initiatives from the Agaro City Administration.</p>
+          <div class="hero-actions">
+            <a href="#/services" class="btn btn-accent"><i class="fa-solid fa-grid-2"></i> Explore Services</a>
+            <a href="#/projects" class="btn btn-outline" style="border-color:rgba(255,255,255,.4);color:#fff"><i class="fa-solid fa-play"></i> View Projects</a>
+          </div>
+          
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="num">85K+</div><div class="lbl">Population</div></div>
+            <div class="hero-stat"><div class="num">12</div><div class="lbl">Woredas</div></div>
+            <div class="hero-stat"><div class="num">48</div><div class="lbl">Schools</div></div>
+            <div class="hero-stat"><div class="num">24</div><div class="lbl">Services</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leadership Spotlight -->
+    <div class="section">
+      <div class="container">
+        <div class="leadership">
+          <div class="leadership-img">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80" alt="City Administrator">
+            <div class="badge">Leadership Spotlight</div>
+          </div>
+          <div class="leadership-content">
+            <div class="eyebrow">City Administrator</div>
+            <h3>Guiding Agaro City to New Heights</h3>
+            <div class="title">Office of the City Administrator</div>
+            <blockquote>"Committed to excellence, focused on progress, and dedicated to our community's success. Together, we are building a prosperous and sustainable future for Agaro."</blockquote>
+            <p style="color:var(--text-light);margin-bottom:20px">Leading transformative initiatives in infrastructure, education, and economic development across Agaro City. A visionary administrator dedicated to sustainable growth and community welfare.</p>
+            <div class="leadership-stats">
+              <div class="l-stat"><div class="val">18+</div><div class="lbl">Projects</div></div>
+              <div class="l-stat"><div class="val">95%</div><div class="lbl">Approval</div></div>
+              <div class="l-stat"><div class="val">12</div><div class="lbl">Woredas</div></div>
+              <div class="l-stat"><div class="val">5+</div><div class="lbl">Years</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services -->
+    <div class="section section-alt">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Government Services</div>
+          <h2>Services for Citizens & Businesses</h2>
+          <p>Access all government services in one place. Quick, convenient, and designed to make your life easier.</p>
+        </div>
+        <div class="services-grid">
+          <div class="service-card">
+            <h3><i class="fa-solid fa-file-signature"></i> Civil Documents</h3>
+            <p>Apply for birth certificates, marriage licenses, and other personal documents.</p>
+            <ul><li>Birth Certificates</li><li>Marriage Licenses</li><li>ID Cards</li><li>Death Certificates</ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="service-card">
+            <h3><i class="fa-solid fa-briefcase"></i> Business Services</h3>
+            <p>Register your business, obtain permits, and access commercial resources.</p>
+            <ul><li>Business Registration</li><li>Trade Licenses</li><li>Tax Services</li><li>Permits</li></ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="service-card">
+            <h3><i class="fa-solid fa-landmark"></i> Government Affairs</h3>
+            <p>Access public records, government tenders, and official publications.</p>
+            <ul><li>Public Records</li><li>Government Tenders</li><li>Official Gazette</li><li>Legal Services</li></ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="service-card">
+            <h3><i class="fa-solid fa-heart-pulse"></i> Health & Social</h3>
+            <p>Healthcare services, social programs, and community support initiatives.</p>
+            <ul><li>Healthcare</li><li>Social Programs</li><li>Community Support</li><li>Emergency Services</li></ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="service-card">
+            <h3><i class="fa-solid fa-graduation-cap"></i> Education</h3>
+            <p>School registration, educational resources, and scholarship opportunities.</p>
+            <ul><li>School Registration</li><li>Educational Resources</li><li>Scholarships</li><li>Adult Education</li></ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+          <div class="service-card">
+            <h3><i class="fa-solid fa-wheat-awn"></i> Agriculture</h3>
+            <p>Farming support, agricultural programs, and rural development services.</p>
+            <ul><li>Farming Support</li><li>Agricultural Programs</li><li>Rural Development</li><li>Crop Insurance</li></ul>
+            <a href="#/services" class="link">Explore Services <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="support-box">
+          <h3>Can't find what you're looking for?</h3>
+          <p>Our customer service team is here to help you navigate government services and find the resources you need.</p>
+          <a href="#/contact" class="btn">Contact Support</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- By The Numbers -->
+    <div class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Progress & Achievements</div>
+          <h2>Agaro City By The Numbers</h2>
+          <p>Discover the impact of our initiatives and the progress we've made together in building a prosperous community.</p>
+        </div>
+        <div class="numbers-grid">
+          <div class="number-card"><i class="fa-solid fa-users"></i><div class="val">85,000+</div><div class="lbl">Population Served</div></div>
+          <div class="number-card"><i class="fa-solid fa-map"></i><div class="val">12</div><div class="lbl">Woredas</div></div>
+          <div class="number-card"><i class="fa-solid fa-school"></i><div class="val">48</div><div class="lbl">Educational Institutions</div></div>
+          <div class="number-card"><i class="fa-solid fa-hospital"></i><div class="val">12</div><div class="lbl">Healthcare Facilities</div></div>
+          <div class="number-card"><i class="fa-solid fa-road"></i><div class="val">120km</div><div class="lbl">Km of Roads Built</div></div>
+          <div class="number-card"><i class="fa-solid fa-seedling"></i><div class="val">85%</div><div class="lbl">Agricultural Projects</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="section section-alt">
+      <div class="container">
+        <div class="achievements-grid">
+          <div class="achievements-content">
+            <div class="eyebrow">Recent Achievements</div>
+            <h3>Recognized Excellence in Public Service</h3>
+            <p>Our commitment to innovation, transparency, and community development has been recognized through numerous awards and achievements at both regional and zonal levels.</p>
+            <div class="achievement-stats">
+              <div class="a-stat"><div class="val">95%</div><div class="lbl">Citizen Satisfaction</div></div>
+              <div class="a-stat"><div class="val">60%</div><div class="lbl">Digital Service Adoption</div></div>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm">Read Our Annual Report</a>
+          </div>
+          <div class="awards-list">
+            <div class="award-item">
+              <div class="award-year">2023</div>
+              <div class="award-info"><h4>Zonal Excellence Award</h4><p>Recognized for outstanding public service innovation and community engagement.</p></div>
+            </div>
+            <div class="award-item">
+              <div class="award-year">2022</div>
+              <div class="award-info"><h4>Economic Growth Leader</h4><p>Highest local GDP growth in the Jimma Zone for two consecutive years.</p></div>
+            </div>
+            <div class="award-item">
+              <div class="award-year">2023</div>
+              <div class="award-info"><h4>Good Governance Certification</h4><p>Awarded for transparency and accountability in city administration.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- News -->
+    <div class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow">Latest Updates</div>
+          <h2>News & Announcements</h2>
+          <p>Stay informed about the latest developments, events, and initiatives from Agaro City Administration.</p>
+        </div>
+        <div class="news-tabs">
+          <button class="news-tab active" data-filter="all">All Updates</button>
+          <button class="news-tab" data-filter="news">News</button>
+          <button class="news-tab" data-filter="events">Events</button>
+        </div>
+        <div class="news-grid" id="homeNewsGrid"></div>
+      </div>
+    </div>
+
+    <!-- Newsletter -->
+    <div class="newsletter">
+      <div class="container">
+        <h3>Stay Updated with Agaro City</h3>
+        <p>Subscribe to our newsletter to receive important announcements, news, and event invitations directly in your inbox.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault();toast('Subscribed successfully!');this.reset()">
+          <input type="email" placeholder="Enter your email address" required>
+          <button type="submit">Subscribe Now</button>
+        </form>
+        <p style="font-size:.8rem;margin-top:12px;color:var(--text-light)">We respect your privacy and will never share your information.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES VIEW -->
+  <section class="view" id="view-services">
+    <div class="hero" style="padding:80px 0 60px">
+      <div class="container" style="text-align:center">
+        <div style="font-size:.85rem;color:var(--accent);margin-bottom:10px"><a href="#/home" style="color:var(--accent)">Home</a> / Services</div>
+        <h1 style="color:#fff">Government Services</h1>
+        <p style="color:rgba(255,255,255,.8);max-width:600px;margin:0 auto">Access all city services, requirements, and office locations in one centralized platform.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="container">
+        <div class="services-grid" id="servicesGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS VIEW -->
+  <section class="view" id="view-projects">
+    <div class="hero" style="padding:80px 0 60px">
+      <div class="container" style="text-align:center">
+        <div style="font-size:.85rem;color:var(--accent);margin-bottom:10px"><a href="#/home" style="color:var(--accent)">Home</a> / Projects</div>
+        <h1 style="color:#fff">Development Projects</h1>
+        <p style="color:rgba(255,255,255,.8);max-width:600px;margin:0 auto">Track the progress of ongoing city development initiatives and infrastructure projects.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="container">
+        <div class="news-grid" id="projectsGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWS VIEW -->
+  <section class="view" id="view-news">
+    <div class="hero" style="padding:80px 0 60px">
+      <div class="container" style="text-align:center">
+        <div style="font-size:.85rem;color:var(--accent);margin-bottom:10px"><a href="#/home" style="color:var(--accent)">Home</a> / News</div>
+        <h1 style="color:#fff">News & Announcements</h1>
+        <p style="color:rgba(255,255,255,.8);max-width:600px;margin:0 auto">Stay informed about the latest developments in Agaro City.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="container">
+        <div class="news-tabs">
+          <button class="news-tab active" data-filter="all" data-page="news">All Updates</button>
+          <button class="news-tab" data-filter="news" data-page="news">News</button>
+          <button class="news-tab" data-filter="events" data-page="news">Events</button>
+        </div>
+        <div class="news-grid" id="newsGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT VIEW -->
+  <section class="view" id="view-contact">
+    <div class="hero" style="padding:80px 0 60px">
+      <div class="container" style="text-align:center">
+        <div style="font-size:.85rem;color:var(--accent);margin-bottom:10px"><a href="#/home" style="color:var(--accent)">Home</a> / Contact</div>
+        <h1 style="color:#fff">Contact Us</h1>
+        <p style="color:rgba(255,255,255,.8);max-width:600px;margin:0 auto">We'd love to hear from you. Reach out with questions, feedback, or suggestions.</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="container">
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:40px;align-items:start">
+          <div>
+            <h3 style="margin-bottom:16px">Get in Touch</h3>
+            <p style="color:var(--text-light);margin-bottom:24px">Our team is ready to assist you with any questions about Agaro City services.</p>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:24px">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div style="width:46px;height:46px;border-radius:10px;background:var(--bg-alt);color:var(--primary);display:grid;place-items:center;flex-shrink:0"><i class="fa-solid fa-location-dot"></i></div>
+                <div><h4 style="font-size:.95rem;margin-bottom:3px;font-family:'Inter',sans-serif">Address</h4><p style="font-size:.88rem;color:var(--text-light)">Agaro City Administration, Jimma Zone, Oromia Region, Ethiopia</p></div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div style="width:46px;height:46px;border-radius:10px;background:var(--bg-alt);color:var(--primary);display:grid;place-items:center;flex-shrink:0"><i class="fa-solid fa-phone"></i></div>
+                <div><h4 style="font-size:.95rem;margin-bottom:3px;font-family:'Inter',sans-serif">Phone</h4><p style="font-size:.88rem;color:var(--text-light)">+251 (0) 000 000 000</p></div>
+              </div>
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <div style="width:46px;height:46px;border-radius:10px;background:var(--bg-alt);color:var(--primary);display:grid;place-items:center;flex-shrink:0"><i class="fa-solid fa-envelope"></i></div>
+                <div><h4 style="font-size:.95rem;margin-bottom:3px;font-family:'Inter',sans-serif">Email</h4><p style="font-size:.88rem;color:var(--text-light)">info@agarocity.gov.et</p></div>
+              </div>
+            </div>
+          </div>
+          <form id="contactForm" style="background:#fff;padding:32px;border-radius:var(--radius-lg);border:1px solid var(--border)">
+            <div class="form-success" id="formSuccess" style="display:none;background:rgba(39,174,96,.1);color:var(--success);padding:12px;border-radius:var(--radius);margin-bottom:16px;font-weight:500;font-size:.9rem;border:1px solid rgba(39,174,96,.3)"><i class="fa-solid fa-circle-check"></i> Message sent successfully!</div>
+            <div class="form-row">
+              <div class="form-group"><label>Full Name *</label><input type="text" id="cName" required></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="cEmail" required></div>
+            </div>
+            <div class="form-group"><label>Subject *</label><select id="cSubject" required><option value="">Select a topic</option><option>General Inquiry</option><option>Feedback</option><option>Complaint</option><option>Suggestion</option></select></div>
+            <div class="form-group"><label>Message *</label><textarea id="cMessage" required></textarea></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-logo">
+            <div class="logo-mark">A</div>
+            <div>Agaro City<small style="display:block;font-size:.65rem;letter-spacing:.2em;color:rgba(255,255,255,.6);font-weight:600">ADMINISTRATION</small></div>
+          </div>
+          <p>Serving our community with excellence and integrity. Building a prosperous future rooted in Oromo values and modern progress.</p>
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:var(--transition)"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:var(--transition)"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:var(--transition)"><i class="fa-brands fa-telegram"></i></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="#/home"><i class="fa-solid fa-chevron-right"></i> Home</a></li>
+            <li><a href="#/services"><i class="fa-solid fa-chevron-right"></i> Services</a></li>
+            <li><a href="#/projects"><i class="fa-solid fa-chevron-right"></i> Projects</a></li>
+            <li><a href="#/news"><i class="fa-solid fa-chevron-right"></i> News</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#/services"><i class="fa-solid fa-chevron-right"></i> Civil Documents</a></li>
+            <li><a href="#/services"><i class="fa-solid fa-chevron-right"></i> Business Services</a></li>
+            <li><a href="#/services"><i class="fa-solid fa-chevron-right"></i> Health & Social</a></li>
+            <li><a href="#/services"><i class="fa-solid fa-chevron-right"></i> Agriculture</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="#"><i class="fa-solid fa-location-dot"></i> Jimma Zone, Oromia</a></li>
+            <li><a href="tel:+251000000000"><i class="fa-solid fa-phone"></i> +251 000 000 000</a></li>
+            <li><a href="mailto:info@agarocity.gov.et"><i class="fa-solid fa-envelope"></i> info@agarocity.gov.et</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div>© 2026 Agaro City Administration. All rights reserved.</div>
+        <div class="powered">Made with <i class="fa-solid fa-heart"></i> in Ethiopia · Powered by Oromia Regional State</div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div class="view admin-login-view" id="view-admin-login">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-mark">A</div>
+      <div>Agaro City<small>ADMIN PORTAL</small></div>
+    </div>
+    <h2>Administrator Login</h2>
+    <p class="subtitle">Access the content management dashboard</p>
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label>Username or Email</label>
+        <input type="text" id="loginUser" placeholder="admin" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+    </form>
+    <div class="login-hint">
+      <strong>Demo Credentials:</strong><br>
+      Username: <code>admin</code> · Password: <code>admin123</code>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="admin-layout" id="adminLayout">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">A</div>
+      <div><h4>Agaro City</h4><small>ADMIN PANEL</small></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar">A</div>
+      <div class="info"><h5>Administrator</h5><span>Super Admin</span></div>
+    </div>
+    <ul class="sidebar-menu">
+      <li class="divider">Main</li>
+      <li><a href="#/admin/dashboard" data-admin="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+      <li class="divider">Content</li>
+      <li><a href="#/admin/news" data-admin="news"><i class="fa-solid fa-newspaper"></i> News & Events</a></li>
+      <li><a href="#/admin/projects" data-admin="projects"><i class="fa-solid fa-helmet-safety"></i> Projects</a></li>
+      <li><a href="#/admin/services" data-admin="services"><i class="fa-solid fa-hand-holding-heart"></i> Services</a></li>
+      <li class="divider">Communication</li>
+      <li><a href="#/admin/feedback" data-admin="feedback"><i class="fa-solid fa-comments"></i> Feedback</a></li>
+      <li class="divider">System</li>
+      <li><a href="#/admin/users" data-admin="users"><i class="fa-solid fa-users-gear"></i> Users</a></li>
+      <li><a href="#/admin/settings" data-admin="settings"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li class="divider"></li>
+      <li><a href="#" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      <li><a href="#/home"><i class="fa-solid fa-arrow-right-from-bracket"></i> View Public Site</a></li>
+    </ul>
+  </aside>
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <button class="btn btn-ghost btn-sm" id="sidebarToggle" style="display:none"><i class="fa-solid fa-bars"></i></button>
+      <div class="page-title">
+        <h2 id="adminPageTitle">Dashboard</h2>
+        <span id="adminPageSub">Welcome back, Administrator</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a href="#/home" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View Site</a>
+      </div>
+    </div>
+    <div class="admin-content" id="adminContent"></div>
+  </div>
+</div>
+
+<!-- Modal & Toast -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Modal</h3>
+      <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* =========================================================
+   DATA STORE
+   ========================================================= */
+const STORAGE_KEY = 'agaro_city_v2';
+const seedData = {
+  news: [
+    {id:1,title:"Agaro City Launches New Digital Portal",category:"news",date:"2026-08-18",image:"https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&q=80",excerpt:"The city administration has officially launched a new digital information and service portal.",content:"The Agaro City Administration is proud to announce the launch of our new digital portal.",author:"City Admin",views:1240},
+    {id:2,title:"Road Construction Project Begins in District 5",category:"news",date:"2026-08-15",image:"https://images.unsplash.com/photo-1541832676-9b734b4b378c?w=800&q=80",excerpt:"A major road construction project has commenced in District 5, improving connectivity.",content:"The new road project spans 5.2 kilometers.",author:"Public Works",views:892},
+    {id:3,title:"Annual Coffee Harvest Festival Announced",category:"events",date:"2026-11-25",image:"https://images.unsplash.com/photo-1509710220933-043008609f6b?w=800&q=80",excerpt:"The annual coffee harvest festival will be held next month, celebrating Agaro's Arabica coffee.",content:"Join us in celebrating the season's finest harvest.",author:"Tourism Office",views:2104},
+    {id:4,title:"Community Health Fair",category:"events",date:"2026-09-25",image:"https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&q=80",excerpt:"Free health screenings, wellness workshops, and family activities at Central Park.",content:"Open to all residents.",author:"Health Bureau",views:654}
+  ],
+  projects: [
+    {id:1,name:"Agaro Central Market Renovation",description:"Modernizing the central market with improved facilities and expanded vendor spaces.",location:"Central District",progress:65,status:"In Progress",image:"https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80"},
+    {id:2,name:"Clean Water Supply Expansion",description:"Expanding clean water access to 5 additional districts through new pipeline infrastructure.",location:"Multiple Districts",progress:42,status:"In Progress",image:"https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=800&q=80"},
+    {id:3,name:"Digital City Portal",description:"Developing a comprehensive web-based information and service portal for citizens.",location:"City Administration",progress:88,status:"In Progress",image:"https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"},
+    {id:4,name:"District 3 Primary School",description:"Construction of a new primary school with 12 classrooms and modern facilities.",location:"District 3",progress:95,status:"In Progress",image:"https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80"}
+  ],
+  services: [
+    {id:1,name:"Civil Documents",icon:"fa-file-signature",description:"Apply for birth certificates, marriage licenses, and other personal documents.",req:"Valid ID, application form, fees",office:"Municipal Office",hours:"Mon-Fri: 8:30 AM - 5:30 PM"},
+    {id:2,name:"Business Services",icon:"fa-briefcase",description:"Register your business, obtain permits, and access commercial resources.",req:"Business license, trade permit",office:"Trade Office",hours:"Mon-Fri: 8:30 AM - 5:30 PM"},
+    {id:3,name:"Health & Social",icon:"fa-heart-pulse",description:"Healthcare services, social programs, and community support initiatives.",req:"Health card, ID",office:"Health Bureau",hours:"24/7 Emergency"},
+    {id:4,name:"Education",icon:"fa-graduation-cap",description:"School registration, educational resources, and scholarship opportunities.",req:"Registration documents, transcripts",office:"Education Bureau",hours:"Mon-Fri: 8:30 AM - 5:30 PM"},
+    {id:5,name:"Agriculture",icon:"fa-wheat-awn",description:"Farming support, agricultural programs, and rural development services.",req:"Farmer ID, land documents",office:"Agriculture Office",hours:"Mon-Fri: 8:30 AM - 5:30 PM"},
+    {id:6,name:"Government Affairs",icon:"fa-landmark",description:"Access public records, government tenders, and official publications.",req:"Valid ID, formal request",office:"City Administration",hours:"Mon-Fri: 8:30 AM - 5:30 PM"}
+  ],
+  feedback: [
+    {id:1,name:"Aster Tadesse",email:"aster@example.com",subject:"General Inquiry",message:"The new portal is very helpful. Thank you for making city information accessible!",date:"2026-08-19",status:"New"}
+  ],
+  users: [
+    {id:1,name:"Administrator",username:"admin",email:"admin@agarocity.gov.et",role:"Super Admin",status:"Active",lastLogin:"2026-08-21 09:15"}
+  ],
+  logs: [
+    {id:1,action:"Login",user:"admin",details:"Successful login",time:"2026-08-21 09:15:32",type:"auth"}
+  ],
+  session: null
+};
+
+function loadData(){
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if(stored){try{return JSON.parse(stored);}catch(e){return {...seedData};}}
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
+  return {...seedData};
+}
+function saveData(){localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));}
+let DB = loadData();
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+const $ = (sel,ctx=document) => ctx.querySelector(sel);
+const $$ = (sel,ctx=document) => Array.from(ctx.querySelectorAll(sel));
+const escapeHtml = str => str ? String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : '';
+const formatDate = d => d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : '';
+
+function toast(msg, type='success'){
+  const container = $('#toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="fa-solid ${type==='success'?'fa-circle-check':'fa-circle-xmark'}"></i><div class="msg">${escapeHtml(msg)}</div><span class="close"><i class="fa-solid fa-xmark"></i></span>`;
+  container.appendChild(el);
+  el.querySelector('.close').onclick = () => el.remove();
+  setTimeout(() => el.remove(), 4000);
+}
+
+function openModal(title, bodyHtml, footerHtml=''){
+  $('#modalTitle').textContent = title;
+  $('#modalBody').innerHTML = bodyHtml;
+  $('#modalFooter').innerHTML = footerHtml;
+  $('#modalBackdrop').classList.add('show');
+}
+function closeModal(){$('#modalBackdrop').classList.remove('show');}
+$('#modalClose').onclick = closeModal;
+$('#modalBackdrop').onclick = (e) => {if(e.target.id==='modalBackdrop') closeModal();};
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+function getRoute(){
+  const hash = location.hash.replace('#/','') || 'home';
+  const parts = hash.split('/');
+  return {section: parts[0], sub: parts[1]};
+}
+
+function route(){
+  const {section, sub} = getRoute();
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $('#adminLayout').classList.remove('active');
+
+  if(section === 'admin'){
+    if(!DB.session){$('#view-admin-login').classList.add('active');return;}
+    $('#adminLayout').classList.add('active');
+    renderAdmin(sub || 'dashboard');
+    return;
+  }
+
+  $('#publicPortal').style.display = 'block';
+  const viewId = 'view-' + (['home','services','projects','news','contact'].includes(section) ? section : 'home');
+  const view = document.getElementById(viewId);
+  if(view){
+    view.classList.add('active');
+    $$('#navLinks a').forEach(a => a.classList.toggle('active', a.dataset.route === section));
+    window.scrollTo({top:0,behavior:'instant'});
+    if(section==='home') renderHome();
+    if(section==='services') renderServices();
+    if(section==='projects') renderProjects();
+    if(section==='news') renderNewsPage();
+  }
+}
+window.addEventListener('hashchange', route);
+
+/* =========================================================
+   PUBLIC RENDERS
+   ========================================================= */
+function renderHome(){
+  const items = DB.news.slice(0,3);
+  $('#homeNewsGrid').innerHTML = items.map(n => `
+    <article class="news-card">
+      <div class="news-img">
+        <img src="${n.image}" alt="${escapeHtml(n.title)}" loading="lazy">
+        <span class="tag">${n.category === 'events' ? 'Event' : 'News'}</span>
+      </div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span><i class="fa-regular fa-calendar"></i> ${formatDate(n.date)}</span>
+          <span><i class="fa-regular fa-eye"></i> ${n.views}</span>
+        </div>
+        <h3>${escapeHtml(n.title)}</h3>
+        <p>${escapeHtml(n.excerpt)}</p>
+        <a href="#" class="link" onclick="viewNews(${n.id});return false;">Read more <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderServices(){
+  $('#servicesGrid').innerHTML = DB.services.map(s => `
+    <div class="service-card">
+      <h3><i class="fa-solid ${s.icon}"></i> ${escapeHtml(s.name)}</h3>
+      <p>${escapeHtml(s.description)}</p>
+      <ul>
+        <li><strong>Requirements:</strong> ${escapeHtml(s.req)}</li>
+        <li><strong>Office:</strong> ${escapeHtml(s.office)}</li>
+        <li><strong>Hours:</strong> ${escapeHtml(s.hours)}</li>
+      </ul>
+    </div>
+  `).join('');
+}
+
+function renderProjects(){
+  $('#projectsGrid').innerHTML = DB.projects.map(p => `
+    <article class="news-card">
+      <div class="news-img">
+        <img src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy">
+        <span class="tag">${escapeHtml(p.status)}</span>
+      </div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span><i class="fa-solid fa-location-dot"></i> ${escapeHtml(p.location)}</span>
+        </div>
+        <h3>${escapeHtml(p.name)}</h3>
+        <p>${escapeHtml(p.description)}</p>
+        <div style="margin-top:auto">
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:6px;font-weight:500">
+            <span>Progress</span><span>${p.progress}%</span>
+          </div>
+          <div style="height:8px;background:var(--bg-alt);border-radius:999px;overflow:hidden">
+            <div style="height:100%;width:${p.progress}%;background:var(--accent);border-radius:999px;transition:width 1s ease"></div>
+          </div>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderNewsPage(filter='all'){
+  const items = filter === 'all' ? DB.news : DB.news.filter(n => n.category === filter);
+  $('#newsGrid').innerHTML = items.map(n => `
+    <article class="news-card">
+      <div class="news-img">
+        <img src="${n.image}" alt="${escapeHtml(n.title)}" loading="lazy">
+        <span class="tag">${n.category === 'events' ? 'Event' : 'News'}</span>
+      </div>
+      <div class="news-body">
+        <div class="news-meta">
+          <span><i class="fa-regular fa-calendar"></i> ${formatDate(n.date)}</span>
+          <span><i class="fa-solid fa-user"></i> ${escapeHtml(n.author)}</span>
+        </div>
+        <h3>${escapeHtml(n.title)}</h3>
+        <p>${escapeHtml(n.excerpt)}</p>
+        <a href="#" class="link" onclick="viewNews(${n.id});return false;">Read more <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </article>
+  `).join('') || '<p style="text-align:center;color:var(--text-light);grid-column:1/-1;padding:40px">No updates found.</p>';
+}
+
+function viewNews(id){
+  const n = DB.news.find(x => x.id === id);
+  if(!n) return;
+  n.views++; saveData();
+  openModal(n.title, `
+    <img src="${n.image}" style="width:100%;height:240px;object-fit:cover;border-radius:8px;margin-bottom:16px">
+    <div class="news-meta" style="margin-bottom:12px">
+      <span><i class="fa-regular fa-calendar"></i> ${formatDate(n.date)}</span>
+      <span><i class="fa-solid fa-user"></i> ${escapeHtml(n.author)}</span>
+    </div>
+    <p style="color:var(--text);line-height:1.7">${escapeHtml(n.content)}</p>
+  `, `<button class="btn btn-outline btn-sm" onclick="closeModal()">Close</button>`);
+}
+
+// Tab switching
+$$('.news-tab').forEach(tab => {
+  tab.onclick = () => {
+    $$('.news-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    if(tab.dataset.page === 'news') renderNewsPage(tab.dataset.filter);
+    else {
+      // Home page filtering (simplified)
+      const filter = tab.dataset.filter;
+      const items = filter === 'all' ? DB.news.slice(0,3) : DB.news.filter(n => n.category === filter).slice(0,3);
+      $('#homeNewsGrid').innerHTML = items.map(n => `
+        <article class="news-card">
+          <div class="news-img"><img src="${n.image}" alt="${escapeHtml(n.title)}" loading="lazy"><span class="tag">${n.category === 'events' ? 'Event' : 'News'}</span></div>
+          <div class="news-body">
+            <div class="news-meta"><span><i class="fa-regular fa-calendar"></i> ${formatDate(n.date)}</span></div>
+            <h3>${escapeHtml(n.title)}</h3>
+            <p>${escapeHtml(n.excerpt)}</p>
+            <a href="#" class="link" onclick="viewNews(${n.id});return false;">Read more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </article>
+      `).join('');
+    }
+  };
+});
+
+/* =========================================================
+   ADMIN RENDERS
+   ========================================================= */
+function renderAdmin(sub){
+  $$('#sidebar-menu a')?.forEach(a => a.classList.toggle('active', a.dataset.admin === sub)); // Fixed selector
+  $$('.sidebar-menu a').forEach(a => a.classList.toggle('active', a.dataset.admin === sub));
+  
+  const titles = {
+    dashboard:['Dashboard','Welcome back, Administrator'],
+    news:['News & Events Management','Create, edit and publish news articles'],
+    projects:['Projects Management','Track development project progress'],
+    services:['Services Management','Manage public service information'],
+    feedback:['Feedback Management','Review citizen messages and feedback'],
+    users:['User Management','Manage administrator accounts'],
+    settings:['Settings','System configuration']
+  };
+  const [t,s] = titles[sub] || titles.dashboard;
+  $('#adminPageTitle').textContent = t;
+  $('#adminPageSub').textContent = s;
+
+  const content = $('#adminContent');
+  const renderers = {
+    dashboard: renderAdminDashboard,
+    news: () => renderAdminTable('news', content),
+    projects: () => renderAdminTable('projects', content),
+    services: () => renderAdminTable('services', content),
+    feedback: renderAdminFeedback,
+    users: renderAdminUsers,
+    settings: renderAdminSettings
+  };
+  (renderers[sub] || renderAdminDashboard)(content);
+}
+
+function renderAdminDashboard(el){
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="top"><div class="ic blue"><i class="fa-solid fa-newspaper"></i></div></div><div class="val">${DB.news.length}</div><div class="lbl">Total News & Events</div></div>
+      <div class="stat-card"><div class="top"><div class="ic orange"><i class="fa-solid fa-helmet-safety"></i></div></div><div class="val">${DB.projects.length}</div><div class="lbl">Active Projects</div></div>
+      <div class="stat-card"><div class="top"><div class="ic green"><i class="fa-solid fa-hand-holding-heart"></i></div></div><div class="val">${DB.services.length}</div><div class="lbl">Public Services</div></div>
+      <div class="stat-card"><div class="top"><div class="ic red"><i class="fa-solid fa-comments"></i></div></div><div class="val">${DB.feedback.filter(f=>f.status==='New').length}</div><div class="lbl">New Feedback</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3 style="font-family:'Inter',sans-serif;font-size:1rem">Recent Activity</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+          <tbody>
+            ${DB.logs.slice(0,5).map(l => `<tr><td>${escapeHtml(l.time)}</td><td><strong>${escapeHtml(l.user)}</strong></td><td>${escapeHtml(l.action)}</td><td>${escapeHtml(l.details)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+const tableConfig = {
+  news: {title:'News & Events',columns:[{key:'image',type:'image'},{key:'title'},{key:'category',type:'badge'},{key:'date',type:'date'}],fields:['title','category','date','image','excerpt','content','author']},
+  projects: {title:'Projects',columns:[{key:'image',type:'image'},{key:'name'},{key:'location'},{key:'progress',type:'progress'},{key:'status',type:'status'}],fields:['name','description','location','progress','status','image']},
+  services: {title:'Services',columns:[{key:'icon',type:'icon'},{key:'name'},{key:'office'},{key:'hours'}],fields:['name','icon','description','req','office','hours']}
+};
+
+function renderAdminTable(type, el){
+  const cfg = tableConfig[type];
+  const items = DB[type];
+  el.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="adminSearch_${type}" placeholder="Search..."></div>
+        <button class="btn btn-primary btn-sm" onclick="openGenericForm('${type}')"><i class="fa-solid fa-plus"></i> Add New</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>${cfg.columns.map(c=>`<th>${c.key.charAt(0).toUpperCase()+c.key.slice(1)}</th>`).join('')}<th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="tbody_${type}">${renderTableRows(type, items, cfg)}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  $(`#adminSearch_${type}`).oninput = (e) => {
+    const q = e.target.value.toLowerCase();
+    const filtered = items.filter(item => Object.values(item).some(v => String(v).toLowerCase().includes(q)));
+    $(`#tbody_${type}`).innerHTML = renderTableRows(type, filtered, cfg);
+  };
+}
+
+function renderTableRows(type, items, cfg){
+  if(!items.length) return `<tr><td colspan="${cfg.columns.length+1}"><div style="padding:40px;text-align:center;color:var(--text-light)">No items found</div></td></tr>`;
+  return items.map(item => `
+    <tr>
+      ${cfg.columns.map(c => {
+        const val = item[c.key];
+        if(c.type==='image') return `<td><img src="${val}" class="table-img" alt=""></td>`;
+        if(c.type==='date') return `<td>${formatDate(val)}</td>`;
+        if(c.type==='badge' || c.type==='status') return `<td><span style="background:var(--bg-alt);padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:600">${escapeHtml(val)}</span></td>`;
+        if(c.type==='progress') return `<td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--bg-alt);border-radius:999px"><div style="height:100%;width:${val}%;background:var(--accent);border-radius:999px"></div></div><span style="font-size:.82rem;font-weight:600">${val}%</span></div></td>`;
+        if(c.type==='icon') return `<td><div style="width:36px;height:36px;border-radius:8px;background:var(--bg-alt);display:grid;place-items:center;color:var(--primary)"><i class="fa-solid ${val}"></i></div></td>`;
+        return `<td>${escapeHtml(val)}</td>`;
+      }).join('')}
+      <td style="text-align:right">
+        <div class="table-actions" style="justify-content:flex-end">
+          <button class="edit" onclick="openGenericForm('${type}',${item.id})"><i class="fa-solid fa-pen"></i></button>
+          <button class="delete" onclick="deleteItem('${type}',${item.id})"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openGenericForm(type, id=null){
+  const item = id ? DB[type].find(x=>x.id===id) : null;
+  const fields = tableConfig[type].fields;
+  const body = `<form id="entityForm">${fields.map(f => {
+    const val = item ? (item[f] || '') : '';
+    if(f==='description' || f==='content' || f==='excerpt') return `<div class="form-group"><label>${f.charAt(0).toUpperCase()+f.slice(1)}</label><textarea name="${f}">${escapeHtml(val)}</textarea></div>`;
+    if(f==='category') return `<div class="form-group"><label>Category</label><select name="${f}"><option ${val==='news'?'selected':''}>news</option><option ${val==='events'?'selected':''}>events</option></select></div>`;
+    if(f==='status') return `<div class="form-group"><label>Status</label><select name="${f}"><option ${val==='In Progress'?'selected':''}>In Progress</option><option ${val==='Completed'?'selected':''}>Completed</option><option ${val==='Planned'?'selected':''}>Planned</option></select></div>`;
+    if(f==='progress') return `<div class="form-group"><label>Progress (%)</label><input type="number" name="${f}" min="0" max="100" value="${val||0}"></div>`;
+    return `<div class="form-group"><label>${f.charAt(0).toUpperCase()+f.slice(1)}</label><input type="${f==='date'?'date':'text'}" name="${f}" value="${escapeHtml(val)}" ${['title','name'].includes(f)?'required':''}></div>`;
+  }).join('')}</form>`;
+  
+  openModal(item ? `Edit ${type.slice(0,-1)}` : `Add New ${type.slice(0,-1)}`, body, `
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="saveEntity('${type}',${id})"><i class="fa-solid fa-check"></i> Save</button>
+  `);
+}
+
+function saveEntity(type, id){
+  const form = $('#entityForm');
+  const data = Object.fromEntries(new FormData(form));
+  if(!data[Object.keys(data)[0]]){toast('Please fill required fields','error');return;}
+  
+  if(id){
+    const idx = DB[type].findIndex(x => x.id === id);
+    DB[type][idx] = {...DB[type][idx], ...data};
+    toast('Updated successfully');
+  } else {
+    const newId = Math.max(0, ...DB[type].map(x => x.id)) + 1;
+    DB[type].unshift({id:newId, ...data, views:0});
+    toast('Created successfully');
+  }
+  saveData(); closeModal(); renderAdminTable(type, $('#adminContent'));
+}
+
+function deleteItem(type, id){
+  openModal('Confirm Delete', '<p>Are you sure you want to delete this item?</p>', `
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary btn-sm" style="background:var(--danger)" onclick="DB['${type}']=DB['${type}'].filter(x=>x.id!==${id});saveData();closeModal();renderAdminTable('${type}',$('#adminContent'));toast('Deleted')"><i class="fa-solid fa-trash"></i> Delete</button>
+  `);
+}
+
+function renderAdminFeedback(el){
+  el.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar"><h3 style="font-family:'Inter',sans-serif;font-size:1rem">Citizen Feedback</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Subject</th><th>Message</th><th>Date</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody>
+            ${DB.feedback.map(f => `
+              <tr>
+                <td><strong>${escapeHtml(f.name)}</strong></td>
+                <td>${escapeHtml(f.email)}</td>
+                <td>${escapeHtml(f.subject)}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(f.message)}</td>
+                <td>${formatDate(f.date)}</td>
+                <td><span style="background:${f.status==='New'?'rgba(231,76,60,.1)':'rgba(39,174,96,.1)'};color:${f.status==='New'?'var(--danger)':'var(--success)'};padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:600">${f.status}</span></td>
+                <td style="text-align:right">
+                  <div class="table-actions" style="justify-content:flex-end">
+                    <button class="edit" onclick="viewFeedback(${f.id})"><i class="fa-solid fa-eye"></i></button>
+                    <button class="delete" onclick="DB.feedback=DB.feedback.filter(x=>x.id!==${f.id});saveData();renderAdminFeedback($('#adminContent'));toast('Deleted')"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function viewFeedback(id){
+  const f = DB.feedback.find(x => x.id === id);
+  if(!f) return;
+  f.status = 'Read'; saveData();
+  openModal(`Feedback from ${f.name}`, `
+    <div style="margin-bottom:14px"><strong>Email:</strong> ${escapeHtml(f.email)}<br><strong>Subject:</strong> ${escapeHtml(f.subject)}<br><strong>Date:</strong> ${formatDate(f.date)}</div>
+    <div style="background:var(--bg-alt);padding:16px;border-radius:8px;border-left:4px solid var(--primary)">${escapeHtml(f.message)}</div>
+  `, `<button class="btn btn-outline btn-sm" onclick="closeModal();renderAdminFeedback($('#adminContent'))">Close</button>`);
+  renderAdminFeedback($('#adminContent'));
+}
+
+function renderAdminUsers(el){
+  el.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <h3 style="font-family:'Inter',sans-serif;font-size:1rem">Administrators</h3>
+        <button class="btn btn-primary btn-sm" onclick="openUserForm()"><i class="fa-solid fa-user-plus"></i> Add User</button>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody>
+            ${DB.users.map(u => `
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--primary);display:grid;place-items:center;font-weight:700">${u.name.charAt(0)}</div><strong>${escapeHtml(u.name)}</strong></div></td>
+                <td>${escapeHtml(u.username)}</td>
+                <td>${escapeHtml(u.email)}</td>
+                <td><span style="background:var(--bg-alt);padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:600">${escapeHtml(u.role)}</span></td>
+                <td><span style="background:rgba(39,174,96,.1);color:var(--success);padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:600">${u.status}</span></td>
+                <td style="text-align:right">
+                  <div class="table-actions" style="justify-content:flex-end">
+                    ${u.id!==1?`<button class="delete" onclick="DB.users=DB.users.filter(x=>x.id!==${u.id});saveData();renderAdminUsers($('#adminContent'));toast('Deleted')"><i class="fa-solid fa-trash"></i></button>`:''}
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function openUserForm(){
+  openModal('Add New User', `
+    <form id="userForm">
+      <div class="form-group"><label>Full Name</label><input type="text" name="name" required></div>
+      <div class="form-group"><label>Username</label><input type="text" name="username" required></div>
+      <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
+      <div class="form-group"><label>Role</label><select name="role"><option>Super Admin</option><option>Content Manager</option><option>Editor</option></select></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" required></div>
+    </form>
+  `, `
+    <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="const d=Object.fromEntries(new FormData($('#userForm')));if(!d.name||!d.username){toast('Fill all fields','error');return;}DB.users.push({id:Math.max(0,...DB.users.map(x=>x.id))+1,...d,status:'Active',lastLogin:'Never'});saveData();closeModal();renderAdminUsers($('#adminContent'));toast('User created')"><i class="fa-solid fa-check"></i> Save</button>
+  `);
+}
+
+function renderAdminSettings(el){
+  el.innerHTML = `
+    <div class="table-wrap" style="padding:32px;max-width:800px">
+      <h3 style="font-family:'Inter',sans-serif;margin-bottom:20px">System Settings</h3>
+      <div class="form-group"><label>Site Name</label><input type="text" value="Agaro City Administration"></div>
+      <div class="form-group"><label>Contact Email</label><input type="email" value="info@agarocity.gov.et"></div>
+      <div class="form-group"><label>Contact Phone</label><input type="tel" value="+251 000 000 000"></div>
+      <button class="btn btn-primary" onclick="toast('Settings saved')"><i class="fa-solid fa-check"></i> Save Settings</button>
+      <hr style="margin:30px 0;border:none;border-top:1px solid var(--border)">
+      <h4 style="font-family:'Inter',sans-serif;margin-bottom:12px;color:var(--danger)">Danger Zone</h4>
+      <button class="btn btn-primary" style="background:var(--danger)" onclick="if(confirm('Reset all data?')){localStorage.removeItem(STORAGE_KEY);DB=loadData();toast('Data reset');route()}"><i class="fa-solid fa-rotate-left"></i> Reset All Data</button>
+    </div>
+  `;
+}
+
+/* =========================================================
+   AUTH & FORMS
+   ========================================================= */
+$('#loginForm').onsubmit = (e) => {
+  e.preventDefault();
+  const user = $('#loginUser').value.trim();
+  const pass = $('#loginPass').value;
+  if((user === 'admin' && pass === 'admin123') || DB.users.some(u => u.username === user)){
+    DB.session = {username: user, loginTime: new Date().toISOString()};
+    saveData();
+    toast('Welcome back, Administrator!');
+    location.hash = '#/admin/dashboard';
+  } else {
+    toast('Invalid credentials. Use admin / admin123', 'error');
+  }
+};
+
+$('#logoutBtn').onclick = (e) => {
+  e.preventDefault();
+  DB.session = null; saveData();
+  toast('Logged out successfully', 'info');
+  location.hash = '#/home';
+};
+
+$('#contactForm').onsubmit = (e) => {
+  e.preventDefault();
+  const name = $('#cName').value, email = $('#cEmail').value, subject = $('#cSubject').value, message = $('#cMessage').value;
+  if(name.length<2 || !email.includes('@') || !subject || message.length<10){
+    toast('Please fill all fields correctly','error'); return;
+  }
+  DB.feedback.unshift({id:Math.max(0,...DB.feedback.map(f=>f.id))+1, name, email, subject, message, date:new Date().toISOString().split('T')[0], status:'New'});
+  saveData();
+  $('#formSuccess').style.display = 'block';
+  $('#contactForm').reset();
+  toast('Message sent successfully!');
+  setTimeout(() => $('#formSuccess').style.display = 'none', 5000);
+};
+
+/* =========================================================
+   MOBILE & INIT
+   ========================================================= */
+const hamburger = $('#hamburger');
+const navMenu = $('#navLinks');
+hamburger.onclick = () => {
+  const open = navMenu.classList.toggle('mobile-open');
+  hamburger.innerHTML = open ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+};
+$$('#navLinks a').forEach(a => a.onclick = () => {
+  navMenu.classList.remove('mobile-open');
+  hamburger.innerHTML = '<i class="fa-solid fa-bars"></i>';
+});
+
+const sidebarToggle = $('#sidebarToggle');
+const sidebar = $('#sidebar');
+const sidebarOverlay = $('#sidebarOverlay');
+function checkAdminMobile(){
+  const mobile = window.innerWidth <= 1024;
+  sidebarToggle.style.display = mobile ? 'inline-flex' : 'none';
+}
+window.addEventListener('resize', checkAdminMobile);
+sidebarToggle.onclick = () => {sidebar.classList.toggle('open');sidebarOverlay.classList.toggle('show');};
+sidebarOverlay.onclick = () => {sidebar.classList.remove('open');sidebarOverlay.classList.remove('show');};
+
+if(!location.hash) location.hash = '#/home';
+checkAdminMobile();
+route();
+</script>
+</body>
+</html>
